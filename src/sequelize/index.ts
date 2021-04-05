@@ -22,7 +22,7 @@ try {
   );
 	
 	const modelDefiners: any = [
-		// require('./models/[file name]'),
+		require('./models/user'),
 	];
 	
 	for (const modelDefiner of modelDefiners) {
@@ -30,7 +30,7 @@ try {
 	}
 	
   // Models.
-	const {} = sequelize.models;
+	const { user } = sequelize.models;
 
   /**
    * Models Associate.

@@ -8,10 +8,12 @@ import createError from 'http-errors';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes';
 
+const { CLIENT_URL } = process.env;
+
 const app = express();
 
 const corsOptions = {
-  origin: "*", // or process.env.CLIENT_URL
+  origin: CLIENT_URL,
   optionsSuccessStatus: 200
 };
 
