@@ -1,7 +1,7 @@
 import ErrnoException = NodeJS.ErrnoException;
 import app from '../app';
 import moment from 'moment';
-// import '../sequelize';
+import '../sequelize';
 
 moment.locale("ko");
 

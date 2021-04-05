@@ -8,7 +8,11 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { text } = req.query;
 
-    return res.json(`Hello Express ! ${text ?? ""}`); 
+    if(!text) {
+      return next({ s: 200, m: "text is undefined" });
+    }
+
+    return res.send(`Hello Express ! ${text ?? ""}`); 
   } catch(err) {
     err.status = err.status ?? 500;
 
