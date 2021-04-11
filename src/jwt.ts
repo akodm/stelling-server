@@ -1,4 +1,9 @@
+import { NextFunction, Response } from 'express';
 import jwt from 'jsonwebtoken';
+import { Model } from 'sequelize/types';
+import sequelize from './sequelize';
+
+const { user } = sequelize.models;
 
 const { EXPIRE = "30m", JWT_KEY } = process.env;
 
@@ -7,7 +12,7 @@ export const randonStr = () => {
   const str = Math.random().toString(36).substr(2,8);
 
   return str;
-}
+};
 
 // jwt token sign.
 export const sign = (param: {}) => {
@@ -16,7 +21,7 @@ export const sign = (param: {}) => {
       ...param,
       salt: randonStr()
     };
-  
+
     const token = jwt.sign(payload, JWT_KEY as string, { expiresIn: EXPIRE });
   
     if(!token) {
@@ -47,6 +52,41 @@ export const verify = (token: string) => {
   } catch(err) {
     console.log("jwt expire.", err.message || err);
     return false;
+  }
+};
+
+// user token check function.
+export const tokenCheck = async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const token = req?.headers["authorization"];
+
+    if(!token) {
+      throw new Error("unauthrization.");
+    }
+
+    const value =  token.split("Bearer")[1].trim();
+
+    const result: any = jwt.verify(value, JWT_KEY as string);
+
+    if(!result || !result.id) {
+      throw new Error("unauthrization.");
+    }
+
+    const data: Model<any, any> | null = await user.findOne({
+      where: {
+        id: result.id
+      }
+    });
+
+    if(!data || !data.getDataValue("id")) {
+      throw new Error("not exists user.");
+    }
+
+    req.user = { id: data.getDataValue("id") };
+
+    return next();
+  } catch(err) {
+    return next(err);
   }
 };
 

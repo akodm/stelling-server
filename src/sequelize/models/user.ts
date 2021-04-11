@@ -1,7 +1,21 @@
-const { DataTypes } = require('sequelize');
+import { DataTypes, Model, Sequelize, BuildOptions } from 'sequelize';
 
-module.exports = (sequelize: any) => {
-  sequelize.define('user', {
+export interface UserAttributes {
+  id: number;
+  email: string;
+  name: string;
+  profile: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+export interface UserModel extends Model<UserAttributes>, UserAttributes {};
+export class User extends Model<UserModel, UserAttributes> {};
+export type UserStatic = typeof Model & {
+  new (values?: object, options?: BuildOptions): UserModel;
+};
+
+export const userTable = (sequelize: Sequelize): UserStatic => {
+  return <UserStatic>sequelize.define('user', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -9,15 +23,15 @@ module.exports = (sequelize: any) => {
       autoIncrement: true
     },
     email: {
-      type: DataTypes.STRING,      // 소셜 로그인 이메일
+      type: DataTypes.STRING(50),      // 소셜 로그인 이메일
       allowNull: false,
       unique: true
     },
     name: {
-      type: DataTypes.STRING,      // 설정 닉네임
+      type: DataTypes.STRING(10),      // 설정 닉네임
     },
     profile: {
-      type: DataTypes.STRING,      // 프로필 사진
+      type: DataTypes.STRING,      // 프로필 사진 주소
     },
   },
   {

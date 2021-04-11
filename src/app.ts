@@ -1,4 +1,5 @@
-require("dotenv").config(); // dotenv config.
+import dotenv from 'dotenv';
+dotenv.config();
 import express, { NextFunction, Request, Response } from 'express';
 import path from 'path';
 import logger from 'morgan';
@@ -7,6 +8,7 @@ import helmet from 'helmet';
 import createError from 'http-errors';
 import cookieParser from 'cookie-parser';
 import indexRouter from './routes';
+import userRouter from './routes/user';
 
 const { CLIENT_URL } = process.env;
 
@@ -26,6 +28,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));  // static folder.
 
 app.use("/", indexRouter);
+app.use("/user", userRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   // Route Not Found.
@@ -43,7 +46,11 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const message = err.m ?? err.message ?? err;
 
   console.log(err);
-  return res.status(status).send(message);
+  return res.status(status).send({
+    result: false,
+    data: null,
+    message
+  });
 });
 
 export default app;

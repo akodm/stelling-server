@@ -1,10 +1,18 @@
 import { Sequelize } from 'sequelize';
+import { userTable } from './models/user';
+import { todoTable } from './models/todo';
+import { scheduleTable } from './models/schedule';
+import { planTable } from './models/plan';
+import { pageTable } from './models/page';
+import { memoTable } from './models/memo';
+import { groupTable } from './models/group';
+import { mediaTable } from './models/media';
 
 console.log("mysql database connecting..");
 
 const { DB = "database", ROOT = "root", PASS = "pass", HOST = "localhost", DB_FORCE = "false", pm_id, NODE_ENV = "development" } = process.env;
 
-let sequelize = null;
+let sequelize: Sequelize;
 
 try {
 	sequelize = new Sequelize(
@@ -20,23 +28,41 @@ try {
 		  }
 	  }
   );
-	
+
 	const modelDefiners: any = [
-		require('./models/user'),
+		userTable,
+		todoTable,
+		scheduleTable,
+		planTable,
+		pageTable,
+		memoTable,
+		groupTable,
+		mediaTable
 	];
 	
 	for (const modelDefiner of modelDefiners) {
 		modelDefiner(sequelize);
 	}
-	
-  // Models.
-	const { user } = sequelize.models;
 
-  /**
-   * Models Associate.
-   */
+	const { user, todo, schedule, plan, page, memo, group, media } = sequelize.models;
 
-  // DB Force Init.
+	user.hasMany(todo);
+	user.hasMany(plan);
+	user.hasMany(memo);
+	user.hasMany(group);
+	plan.hasMany(schedule);
+	group.hasMany(page);
+	page.hasMany(media);
+
+	todo.belongsTo(user);
+	plan.belongsTo(user);
+	memo.belongsTo(user);
+	group.belongsTo(user);
+	schedule.belongsTo(plan);
+	page.belongsTo(group);
+	media.belongsTo(page);
+
+	// DB Force Init.
 	let pmInit = false;
 	if(NODE_ENV === "production") {
 		if(pm_id === "0") {
