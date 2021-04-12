@@ -8,14 +8,15 @@ import helmet from 'helmet';
 import createError from 'http-errors';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
+import swaggerUi from 'swagger-ui-express';
 import indexRouter from './routes';
 import userRouter from './routes/user';
 import planRouter from './routes/plan';
+import * as swaggerDocument from './swagger-empty.json';
 
-const { CLIENT_URL } = process.env;
+const { CLIENT_URL, NODE_ENV } = process.env;
 
 const app = express();
-
 interface CorsType {
   origin: [string];
   optionsSuccessStatus?: number;
@@ -27,7 +28,12 @@ const corsOptions: CorsType = {
 };
 
 app.use(cors(corsOptions));
-app.use(helmet());
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", "data:", "https://www.gstatic.com"]
+  }
+}));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -38,6 +44,7 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/user", userRouter);
 app.use("/plan", planRouter);
+NODE_ENV === "development" && app.use("/swagger-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   // Route Not Found.
@@ -55,6 +62,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const message = err.m ?? err.message ?? err;
 
   console.log(err);
+
   return res.status(status).send({
     result: false,
     data: null,
