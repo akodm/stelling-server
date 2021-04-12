@@ -56,7 +56,7 @@ export const verify = (token: string) => {
 };
 
 // user token check function.
-export const tokenCheck = async (req: any, res: Response, next: NextFunction) => {
+export const check = async (req: any, res: Response, next: NextFunction) => {
   try {
     const token = req?.headers["authorization"];
 

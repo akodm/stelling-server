@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import createError from 'http-errors';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
 import indexRouter from './routes';
 import userRouter from './routes/user';
 
@@ -14,8 +15,13 @@ const { CLIENT_URL } = process.env;
 
 const app = express();
 
-const corsOptions = {
-  origin: CLIENT_URL,
+interface CorsType {
+  origin: [string];
+  optionsSuccessStatus?: number;
+};
+
+const corsOptions: CorsType = {
+  origin: [CLIENT_URL as string],
   optionsSuccessStatus: 200
 };
 
@@ -26,6 +32,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));  // static folder.
+app.use(passport.initialize());
 
 app.use("/", indexRouter);
 app.use("/user", userRouter);

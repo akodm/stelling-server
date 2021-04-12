@@ -23,16 +23,24 @@ export const userTable = (sequelize: Sequelize): UserStatic => {
       autoIncrement: true
     },
     email: {
-      type: DataTypes.STRING(50),      // 소셜 로그인 이메일
+      type: DataTypes.STRING(50),       // 소셜 로그인 이메일
       allowNull: false,
       unique: true
     },
     name: {
-      type: DataTypes.STRING(10),      // 설정 닉네임
+      type: DataTypes.STRING(10),       // 설정 닉네임
     },
     profile: {
-      type: DataTypes.STRING,      // 프로필 사진 주소
+      type: DataTypes.STRING,           // 프로필 사진 주소
     },
+    type: {
+      type: DataTypes.STRING,           // 로그인 타입
+      allowNull: false
+    },
+    login: {
+      type: DataTypes.STRING,           // 현재 로그인 여부
+      allowNull: false
+    }
   },
   {
     freezeTableName: true
