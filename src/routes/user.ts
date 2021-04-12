@@ -49,7 +49,7 @@ passport.use(new GoogleStrategy({
 // kakao auth.
 router.get("/kakao", passport.authenticate('kakao', { session: false }));
 
-// kakao callback.
+// non rest ful api. kakao callback.
 router.get("/kakao/callback", passport.authenticate('kakao', { session: false, failureRedirect: `${CLIENT_URL}/#/login?state=failed` }), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = req.user;
@@ -94,7 +94,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
 // google auth.
 router.get("/google", passport.authenticate('google', { session: false }));
 
-// google callback.
+// non rest ful api. google callback.
 router.get("/google/callback", passport.authenticate('google', { session: false, failureRedirect: `${CLIENT_URL}/#/login?state=failed` }), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = req.user;
@@ -136,7 +136,7 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
   }
 });
 
-// non restf ul api. kakao login & google login & stelling login logout.
+// non rest ful api. kakao login & google login & stelling login logout.
 router.post("/logout", check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { id } = req.user;

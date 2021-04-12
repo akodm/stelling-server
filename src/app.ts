@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import indexRouter from './routes';
 import userRouter from './routes/user';
+import planRouter from './routes/plan';
 
 const { CLIENT_URL } = process.env;
 
@@ -36,6 +37,7 @@ app.use(passport.initialize());
 
 app.use("/", indexRouter);
 app.use("/user", userRouter);
+app.use("/plan", planRouter);
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   // Route Not Found.
