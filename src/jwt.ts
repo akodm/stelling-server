@@ -61,7 +61,7 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
     const token = req?.headers["authorization"];
 
     if(!token) {
-      throw new Error("unauthrization.");
+      return next({ s: 401, m: "unauthrization." });
     }
 
     const value =  token.split("Bearer")[1].trim();
@@ -69,7 +69,7 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
     const result: any = jwt.verify(value, JWT_KEY as string);
 
     if(!result || !result.id) {
-      throw new Error("unauthrization.");
+      return next({ s: 401, m: "unauthrization." });
     }
 
     const data: Model<any, any> | null = await user.findOne({
@@ -79,7 +79,7 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
     });
 
     if(!data || !data.getDataValue("id")) {
-      throw new Error("not exists user.");
+      return next({ s: 403, m: "not exists user." });
     }
 
     req.user = { id: data.getDataValue("id") };
@@ -87,8 +87,8 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
     return next();
   } catch(err) {
     err.status = err.message === "invalid token" ? 401 : err.status;
-    err.status = err.message === "unauthrization." ? 401 : err.status;
-    err.status = /expire/.test(err.message) ? 200 : err.status;
+    err.status = err.message === "jwt expired" ? 200 : err.status;
+    err.status = err.message === "invalid signature" ? 401 : err.status;
 
     return next(err);
   }

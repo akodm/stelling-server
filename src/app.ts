@@ -38,7 +38,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "public")));  // static folder.
+app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
 app.use("/", indexRouter);
@@ -47,17 +47,10 @@ app.use("/plan", planRouter);
 NODE_ENV === "development" && app.use("/swagger-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  // Route Not Found.
   next(createError(404));
 });
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  /**
-   * Route API Error Handling.
-   * throw new Error: x.
-   * custom handling: return next({ s: statusCode, m: error message. });
-   */
-
   const status = err.s ?? err.status ?? 500;
   const message = err.m ?? err.message ?? err;
 
