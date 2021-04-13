@@ -86,7 +86,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
       ...req.body
     });
 
-    return res.status(200).send({
+    return res.status(201).send({
       result: true,
       data
     });

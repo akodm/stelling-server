@@ -86,6 +86,10 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
 
     return next();
   } catch(err) {
+    err.status = err.message === "invalid token" ? 401 : err.status;
+    err.status = err.message === "unauthrization." ? 401 : err.status;
+    err.status = /expire/.test(err.message) ? 200 : err.status;
+
     return next(err);
   }
 };
