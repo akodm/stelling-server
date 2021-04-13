@@ -1,3 +1,17 @@
+# STELLING Server. ( typescript & express )
+---
+### Process.
+```md
+1. touch .env swagger.json
+2. write .env & swagger.json
+3. local mysql database setup.
+4. yarn
+5. yarn ts-dev
+6. (production build) yarn tsc
+7. (dummy data create) HTTP POST /dummy/all
+8. (production run) yarn pm2-pro or (development run) yarn pm2
+```
+
 # Typescript & Express.
 
 ### YARN.
