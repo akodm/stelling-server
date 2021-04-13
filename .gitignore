@@ -4,3 +4,4 @@
 /.env
 /build
 swagger.json
+.schedule.md
