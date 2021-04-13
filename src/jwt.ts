@@ -68,13 +68,13 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
 
     const result: any = jwt.verify(value, JWT_KEY as string);
 
-    if(!result || !result.id) {
+    if(!result || !result.userId) {
       return next({ s: 401, m: "unauthrization." });
     }
 
     const data: Model<any, any> | null = await user.findOne({
       where: {
-        id: result.id
+        id: result.userId
       }
     });
 
@@ -82,7 +82,7 @@ export const check = async (req: any, res: Response, next: NextFunction) => {
       return next({ s: 403, m: "not exists user." });
     }
 
-    req.user = { id: data.getDataValue("id") };
+    req.user = { userId: data.getDataValue("id") };
 
     return next();
   } catch(err) {

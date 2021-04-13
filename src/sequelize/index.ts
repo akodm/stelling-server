@@ -46,13 +46,13 @@ try {
 
 	const { user, todo, schedule, plan, page, memo, group, media } = sequelize.models;
 
-	user.hasMany(todo);
-	user.hasMany(plan);
-	user.hasMany(memo);
-	user.hasMany(group);
-	plan.hasMany(schedule);
-	group.hasMany(page);
-	page.hasMany(media);
+	user.hasMany(todo, { onDelete: "cascade" });
+	user.hasMany(plan, { onDelete: "cascade" });
+	user.hasMany(memo, { onDelete: "cascade" });
+	user.hasMany(group, { onDelete: "cascade" });
+	plan.hasMany(schedule, { onDelete: "cascade" });
+	group.hasMany(page, { onDelete: "cascade" });
+	page.hasMany(media, { onDelete: "cascade" });
 
 	todo.belongsTo(user);
 	plan.belongsTo(user);

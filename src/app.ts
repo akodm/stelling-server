@@ -12,6 +12,8 @@ import swaggerUi from 'swagger-ui-express';
 import indexRouter from './routes';
 import userRouter from './routes/user';
 import planRouter from './routes/plan';
+import groupRouter from './routes/group';
+import pageRouter from './routes/page';
 import * as swaggerDocument from './swagger-empty.json';
 
 const { CLIENT_URL, NODE_ENV } = process.env;
@@ -44,6 +46,9 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/user", userRouter);
 app.use("/plan", planRouter);
+app.use("/group", groupRouter);
+app.use("/page", pageRouter);
+// only development env. api docs with swagger.
 NODE_ENV === "development" && app.use("/swagger-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {

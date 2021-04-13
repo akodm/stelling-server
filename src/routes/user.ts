@@ -73,7 +73,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
       });
     }
 
-    const token = sign({ id: userData.getDataValue("id") });
+    const token = sign({ userId: userData.getDataValue("id") });
 
     if(!token) {
       throw new Error("사용자 로그인 중 에러가 발생했습니다. 다시 시도해주세요.");
@@ -118,7 +118,7 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
       });
     }
 
-    const token = sign({ id: userData.getDataValue("id") });
+    const token = sign({ userId: userData.getDataValue("id") });
 
     if(!token) {
       throw new Error("사용자 로그인 중 에러가 발생했습니다. 다시 시도해주세요.");
@@ -139,13 +139,13 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
 // non rest ful api. kakao login & google login & stelling login logout.
 router.post("/logout", check, async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.user;
+    const { userId } = req.user;
 
-    if(!id) {
+    if(!userId) {
       throw new Error("사용자 아이디가 없습니다.");
     }
 
-    const userData: Model<any, any> | null = await user.findOne({ where: { id } });
+    const userData: Model<any, any> | null = await user.findOne({ where: { id: userId } });
 
     if(!userData) {
       return next({ s: 200, m: "해당 사용자가 없습니다." });
@@ -160,7 +160,7 @@ router.post("/logout", check, async (req: any, res: Response, next: NextFunction
         login: "N"
       }, {
         where: {
-          id
+          id: userId
         },
         transaction
       });

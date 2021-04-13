@@ -3,28 +3,31 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 // import { check } from '../jwt';
-import { objCheck } from '../utils';
 
 const router = express.Router();
 
-const { plan, user, schedule } = sequelize.models;
+const { page, user, group, media } = sequelize.models;
 
-// plan all api.
+// page all api.
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.query;
+    const { groupId } = req.query;
 
-    if(!userId) {
-      return next({ s: 200, m: "유저 아이디가 비어있습니다." });
+    if(!groupId) {
+      return next({ s: 200, m: "선택된 그룹이 없습니다." });
     }
 
-    const data: Model<any, any>[] = await plan.findAll({
-      include: [
-        { model: user, attributes: ["id", "name"] },
-        { model: schedule }
-      ],
+    const data: Model<any, any>[] = await page.findAll({
+      include: [{ 
+        model: group, include: [{ 
+          model: user, attributes: ["id", "name"] 
+        }]
+      },
+      {
+        model: media
+      }],
       where: {
-        userId
+        groupId
       }
     });
 
@@ -39,7 +42,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan one api.
+// page one api.
 router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -48,10 +51,16 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
       return next({ s: 200, m: "아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any> | null = await plan.findOne({
+    const data: Model<any, any> | null = await page.findOne({
       include: [
-        { model: user, attributes: ["id", "name"] },
-        { model: schedule }
+        { 
+          model: group, include: [{ 
+            model: user, attributes: ["id", "name"] 
+          }]
+        },
+        {
+          model: media
+        }
       ],
       where: {
         id
@@ -69,20 +78,17 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
   } 
 });
 
-// plan add api.
+// page add api.
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, userId } = req.body;
+    const { groupId } = req.body;
 
-    const reqCheck = objCheck({ start, end, userId });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 값이 있습니다.` });
+    if(!groupId) {
+      return next({ s: 200, m: "선택된 그룹이 없습니다." });
     }
 
     const data = await sequelize.transaction( async (transaction) => {
-      const item = await plan.create({
+      const item = await page.create({
         ...req.body,
       }, { 
         transaction 
@@ -102,20 +108,17 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan update api.
+// page update api.
 router.put("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, id } = req.body;
+    const { id } = req.body;
 
-    const reqCheck = objCheck({ start, end, id });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 값이 있습니다.` });
+    if(!id) {
+      return next({ s: 200, m: "페이지 아이디가 비어있습니다." });
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.update({
+      await page.update({
         ...req.body
       }, {
         where: {
@@ -125,11 +128,15 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
       });
     });
 
-    const data = await plan.findOne({
-      include: [
-        { model: user, attributes: ["id", "name"] },
-        { model: schedule }
-      ],
+    const data = await page.findOne({
+      include: [{ 
+        model: group, include: [{ 
+          model: user, attributes: ["id", "name"] 
+        }]
+      },
+      {
+        model: media
+      }],
       where: {
         id
       }
@@ -146,7 +153,7 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan delete api.
+// page delete api.
 router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -156,12 +163,12 @@ router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.destroy({
+      await page.destroy({
         where: {
           id
         },
         transaction
-      })
+      });
     });
 
     return res.status(200).send({

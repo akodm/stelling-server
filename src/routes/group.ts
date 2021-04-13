@@ -3,13 +3,12 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 // import { check } from '../jwt';
-import { objCheck } from '../utils';
 
 const router = express.Router();
 
-const { plan, user, schedule } = sequelize.models;
+const { group, user, page, media } = sequelize.models;
 
-// plan all api.
+// group all api.
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.query;
@@ -18,10 +17,12 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
       return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any>[] = await plan.findAll({
+    const data: Model<any, any>[] = await group.findAll({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
+        { model: page, include: [{
+          model: media
+        }] }
       ],
       where: {
         userId
@@ -39,7 +40,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan one api.
+// group one api.
 router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -48,10 +49,12 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
       return next({ s: 200, m: "아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any> | null = await plan.findOne({
+    const data: Model<any, any> | null = await group.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
+        { model: page, include: [{
+          model: media
+        }] }
       ],
       where: {
         id
@@ -69,21 +72,19 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
   } 
 });
 
-// plan add api.
+// group add api.
 router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, userId } = req.body;
+    const { userId } = req.body;
 
-    const reqCheck = objCheck({ start, end, userId });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 값이 있습니다.` });
+    if(!userId) {
+      return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
-
+    
     const data = await sequelize.transaction( async (transaction) => {
-      const item = await plan.create({
+      const item = await group.create({
         ...req.body,
+        userId
       }, { 
         transaction 
       });
@@ -102,20 +103,17 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan update api.
+// group update api.
 router.put("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, id } = req.body;
+    const { id } = req.body;
 
-    const reqCheck = objCheck({ start, end, id });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 값이 있습니다.` });
+    if(!id) {
+      return next({ s: 200, m: "선택된 그룹이 없습니다." });
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.update({
+      await group.update({
         ...req.body
       }, {
         where: {
@@ -125,10 +123,12 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
       });
     });
 
-    const data = await plan.findOne({
+    const data = await group.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
+        { model: page, include: [{
+          model: media
+        }] }
       ],
       where: {
         id
@@ -146,7 +146,7 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// plan delete api.
+// group delete api.
 router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -156,12 +156,12 @@ router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.destroy({
+      await group.destroy({
         where: {
           id
         },
         transaction
-      })
+      });
     });
 
     return res.status(200).send({
