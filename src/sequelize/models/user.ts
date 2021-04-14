@@ -34,11 +34,11 @@ export const userTable = (sequelize: Sequelize): UserStatic => {
       type: DataTypes.STRING,           // 프로필 사진 주소
     },
     type: {
-      type: DataTypes.STRING,           // 로그인 타입
+      type: DataTypes.STRING(7),           // 로그인 타입
       allowNull: false
     },
     login: {
-      type: DataTypes.STRING,           // 현재 로그인 여부
+      type: DataTypes.STRING(1),           // 현재 로그인 여부
       allowNull: false
     }
   },

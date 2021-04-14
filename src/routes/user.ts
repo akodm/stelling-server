@@ -3,6 +3,7 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 import { sign, check } from '../jwt';
+import { uploader } from '../utils';
 import qs from 'qs';
 import passport from 'passport';
 import * as passportKakao from 'passport-kakao';
@@ -13,6 +14,8 @@ const router = express.Router();
 const { KAKAO_KEY, KAKAO_SECRET, CLIENT_URL, GOOGLE_KEY, GOOGLE_SECRET } = process.env;
 
 const { user } = sequelize.models;
+
+const FAILED_REDIRECT_PATH = `${CLIENT_URL}/#/login?state=failed`;
 
 // strategy.
 const KakaoStrategy = passportKakao.Strategy;
@@ -49,7 +52,7 @@ passport.use(new GoogleStrategy({
 router.get("/kakao", passport.authenticate('kakao', { session: false }));
 
 // non rest ful api. kakao callback.
-router.get("/kakao/callback", passport.authenticate('kakao', { session: false, failureRedirect: `${CLIENT_URL}/#/login?state=failed` }), async (req: Request, res: Response, next: NextFunction) => {
+router.get("/kakao/callback", passport.authenticate('kakao', { session: false, failureRedirect: FAILED_REDIRECT_PATH }), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = req.user;
 
@@ -86,7 +89,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
     return res.redirect(`${CLIENT_URL}/#/login?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
-    return res.redirect(`${CLIENT_URL}/#/login?state=failed`);
+    return res.redirect(FAILED_REDIRECT_PATH);
   }
 });
 
@@ -94,7 +97,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
 router.get("/google", passport.authenticate('google', { session: false }));
 
 // non rest ful api. google callback.
-router.get("/google/callback", passport.authenticate('google', { session: false, failureRedirect: `${CLIENT_URL}/#/login?state=failed` }), async (req: Request, res: Response, next: NextFunction) => {
+router.get("/google/callback", passport.authenticate('google', { session: false, failureRedirect: FAILED_REDIRECT_PATH }), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const email = req.user;
 
@@ -131,7 +134,7 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
     return res.redirect(`${CLIENT_URL}/#/login?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
-    return res.redirect(`${CLIENT_URL}/#/login?state=failed`);
+    return res.redirect(FAILED_REDIRECT_PATH);
   }
 });
 
@@ -170,6 +173,137 @@ router.post("/logout", check, async (req: any, res: Response, next: NextFunction
     res.status(200).send({
       result: true,
       data: "성공적으로 로그아웃 처리되었습니다."
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+// user token extension api.
+router.get("/token", check, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+
+    if(!userId) {
+      throw new Error("사용자 아이디가 없습니다.");
+    }
+
+    const data: Model<any, any> | null = await user.findOne({
+      attributes: ["id", "name", "profile", "login"],
+      where: {
+        id: userId
+      }
+    });
+
+    const token = sign({ userId });
+
+    if(!token) {
+      throw new Error("사용자 조회 중 에러가 발생했습니다. 다시 시도해주세요.");
+    }
+
+    return res.status(200).send({
+      result: true,
+      token,
+      data
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+// user one api.
+router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.query;
+
+    if(!id) {
+      return next({ s: 200, m: "유저 아이디가 비어있습니다." });
+    }
+
+    const data: Model<any, any> | null = await user.findOne({ 
+      attributes: ["id", "name", "profile"],
+      where: { 
+        id 
+      } 
+    });
+
+    return res.status(200).send({
+      result: true,
+      data
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+// user update api.
+router.put("/", check, uploader.single("profile"), async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+    const { name = "" } = req.body;
+    const { profile = {} } = req.file;
+
+    if(!userId) {
+      throw new Error("사용자 아이디가 없습니다.");
+    }
+
+    if(!name && !profile?.location) {
+      return res.status(200).send({
+        result: true,
+        data: "변경된 내용이 없습니다."
+      });
+    }
+
+    await sequelize.transaction( async (transaction) => {
+      await user.update({
+        ...req.body,
+        profile: profile.location
+      }, {
+        where: {
+          id: userId
+        },
+        transaction
+      });
+    });
+
+    return res.status(200).send({
+      result: true,
+      data: "성공적으로 수정되었습니다."
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+// user delete api.
+router.delete("/", check, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+
+    if(!userId) {
+      throw new Error("사용자 아이디가 없습니다.");
+    }
+
+    await sequelize.transaction( async (transaction) => {
+      await user.destroy({
+        where: {
+          id: userId
+        },
+        transaction
+      });
+    });
+
+    return res.status(200).send({
+      result: true,
+      data: "성공적으로 삭제되었습니다."
     });
   } catch(err) {
     err.status = err.status ?? 500;
