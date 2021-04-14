@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
-// import { Op } from 'sequelize';
 import { sign, check } from '../jwt';
 import qs from 'qs';
 import passport from 'passport';

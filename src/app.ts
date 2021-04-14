@@ -12,6 +12,7 @@ import swaggerUi from 'swagger-ui-express';
 import indexRouter from './routes';
 import userRouter from './routes/user';
 import planRouter from './routes/plan';
+import scheduleRouter from './routes/schedule';
 import groupRouter from './routes/group';
 import pageRouter from './routes/page';
 import * as swaggerDocument from './swagger-empty.json';
@@ -46,6 +47,7 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/user", userRouter);
 app.use("/plan", planRouter);
+app.use("/schedule", scheduleRouter);
 app.use("/group", groupRouter);
 app.use("/page", pageRouter);
 // only development env. api docs with swagger.
