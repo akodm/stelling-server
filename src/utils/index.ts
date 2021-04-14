@@ -20,7 +20,7 @@ const s3Config: S3configs = {
 const AwsClient = new aws.S3(s3Config);
 
 // multer file uploader.
-export const uploader = multer({
+export const uploader = (path: string) => multer({
   storage: multerS3({
     s3: AwsClient,
     bucket: BUCKET_NAME as string,
@@ -32,7 +32,7 @@ export const uploader = multer({
       const [ type ] = mimetype.split("/");
 
       if(type === "image") {
-        cd(null, `image/${now.format("YYYY-MM-DD-ddd")}/${now.format("x")}_${parseName}`);
+        cd(null, `image/${path}/${now.format("YYYY-MM-DD-ddd")}/${now.format("x")}_${parseName}`);
       } else {
         cd("type missmatch. ( require image. )", undefined);
       }

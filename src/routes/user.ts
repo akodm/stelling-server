@@ -243,7 +243,7 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // user update api.
-router.put("/", check, uploader.single("profile"), async (req: any, res: Response, next: NextFunction) => {
+router.put("/", check, uploader("users").single("profile"), async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
     const { name = "" } = req.body;
