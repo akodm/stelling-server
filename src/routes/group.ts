@@ -82,14 +82,12 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
     }
     
     const data = await sequelize.transaction( async (transaction) => {
-      const item = await group.create({
+      return await group.create({
         ...req.body,
         userId
       }, { 
         transaction 
       });
-
-      return item;
     });
 
     return res.status(201).send({

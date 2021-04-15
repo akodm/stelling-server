@@ -36,7 +36,7 @@ router.post("/dummy/all", async (req: Request, res: Response, next: NextFunction
 
     if(!key || key !== ADMIN_KEY) {
       return next({ s: 401, m: "API 생성을 위한 키 값과 다릅니다." });
-    }
+    } 
 
     if(!userId) {
       return next({ s: 200, m: "userId 가 필요합니다." });
@@ -50,7 +50,7 @@ router.post("/dummy/all", async (req: Request, res: Response, next: NextFunction
 
     return res.status(200).send({
       result: true,
-      text: "성공적으로 생성되었습니다.",
+      text: result.message,
       data: result.data
     });
   } catch(err) {

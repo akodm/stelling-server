@@ -88,13 +88,11 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
     }
 
     const data = await sequelize.transaction( async (transaction) => {
-      const item = await page.create({
+      return await page.create({
         ...req.body,
       }, { 
         transaction 
       });
-
-      return item;
     });
 
     return res.status(201).send({

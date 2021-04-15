@@ -101,7 +101,7 @@ export const dummyCreatorFunction = async (userId: number) => {
     return {
       err: false,
       data: null,
-      message: "",
+      message: "성공적으로 생성되었습니다.",
     };
   } catch(err) {
     return {
