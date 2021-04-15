@@ -2,14 +2,14 @@ import { NextFunction, Request, Response } from "express";
 import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
-// import { check } from '../jwt';
+import { check } from '../jwt';
 
 const router = express.Router();
 
 const { page, user, group, media } = sequelize.models;
 
 // page all api.
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { groupId } = req.query;
 
@@ -43,7 +43,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // page one api.
-router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
 
@@ -79,7 +79,7 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // page add api.
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { groupId } = req.body;
 
@@ -109,7 +109,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // page update api.
-router.put("/", async (req: Request, res: Response, next: NextFunction) => {
+router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.body;
 
@@ -154,7 +154,7 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // page delete api.
-router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
 

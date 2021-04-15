@@ -3,7 +3,7 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 import { sign, check } from '../jwt';
-import { uploader } from '../utils';
+import { uploader, s3DeleteObject } from '../utils';
 import qs from 'qs';
 import passport from 'passport';
 import * as passportKakao from 'passport-kakao';
@@ -216,18 +216,18 @@ router.get("/token", check, async (req: any, res: Response, next: NextFunction) 
 });
 
 // user one api.
-router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.query;
+    const { userId } = req.user;
 
-    if(!id) {
+    if(!userId) {
       return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
 
     const data: Model<any, any> | null = await user.findOne({ 
       attributes: ["id", "name", "profile"],
       where: { 
-        id 
+        id: userId
       } 
     });
 
@@ -247,13 +247,17 @@ router.put("/", check, uploader("users").single("profile"), async (req: any, res
   try {
     const { userId } = req.user;
     const { name = "" } = req.body;
-    const { profile = {} } = req.file;
+    const { key, location } = req.file;
 
     if(!userId) {
+      if(key) {
+        s3DeleteObject(key);
+      }
+      
       throw new Error("사용자 아이디가 없습니다.");
     }
 
-    if(!name && !profile?.location) {
+    if(!name && !key) {
       return res.status(200).send({
         result: true,
         data: "변경된 내용이 없습니다."
@@ -263,7 +267,7 @@ router.put("/", check, uploader("users").single("profile"), async (req: any, res
     await sequelize.transaction( async (transaction) => {
       await user.update({
         ...req.body,
-        profile: profile.location
+        profile: location
       }, {
         where: {
           id: userId

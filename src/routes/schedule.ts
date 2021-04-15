@@ -3,14 +3,14 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 import { objCheck } from '../utils';
-// import { check } from '../jwt';
+import { check } from '../jwt';
 
 const router = express.Router();
 
 const { schedule, plan, user } = sequelize.models;
 
 // schedule all api.
-router.get("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { planId } = req.query;
 
@@ -43,7 +43,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // schedule one api.
-router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
 
@@ -76,7 +76,7 @@ router.get("/one", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // schedule add api.
-router.post('/', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { planId, title, start, end } = req.body;
 
@@ -109,7 +109,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // schedule update api.
-router.put("/", async (req: Request, res: Response, next: NextFunction) => {
+router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id, title, start, end } = req.body;
 
@@ -156,7 +156,7 @@ router.put("/", async (req: Request, res: Response, next: NextFunction) => {
 });
 
 // schedule delete api.
-router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
 

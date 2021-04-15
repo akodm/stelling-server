@@ -15,6 +15,7 @@ import planRouter from './routes/plan';
 import scheduleRouter from './routes/schedule';
 import groupRouter from './routes/group';
 import pageRouter from './routes/page';
+import mediaRouter from './routes/media';
 import * as swaggerDocument from './swagger-empty.json';
 
 const { CLIENT_URL, NODE_ENV } = process.env;
@@ -50,6 +51,7 @@ app.use("/plan", planRouter);
 app.use("/schedule", scheduleRouter);
 app.use("/group", groupRouter);
 app.use("/page", pageRouter);
+app.use("/media", mediaRouter);
 // only development env. api docs with swagger.
 NODE_ENV === "development" && app.use("/swagger-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, { explorer: true }));
 

@@ -42,11 +42,7 @@ export const uploader = (path: string) => multer({
 
 // s3 file delete.
 export const s3DeleteObject = (src: string) => {
-  const parse = decodeURIComponent(src);
-
-  const exec: RegExpExecArray | null = /amazonaws.com\/(.*)/.exec(parse);
-
-  const Key = exec ? exec[1] : "";
+  const Key = decodeURIComponent(src);
 
   AwsClient.deleteObject({
     Bucket: BUCKET_NAME as string,
@@ -54,20 +50,10 @@ export const s3DeleteObject = (src: string) => {
   }, (err) => {
     if(err) {
       console.log("s3 delete file path: ", src); 
-
-      return { 
-        result: false, 
-        err 
-      };
+    } else {
+      console.log("s3 delete file: ", Key);
     }
-
-    console.log("s3 delete file: ", Key);
   });
-
-  return { 
-    result: true, 
-    err: false 
-  };
 };
 
 // json object check.
