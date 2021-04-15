@@ -7,9 +7,9 @@ import { objCheck } from '../utils';
 
 const router = express.Router();
 
-const { plan, user, schedule } = sequelize.models;
+const { todo, user } = sequelize.models;
 
-// plan all api.
+// todo all api.
 router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.query;
@@ -18,10 +18,9 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
       return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any>[] = await plan.findAll({
+    const data: Model<any, any>[] = await todo.findAll({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         userId
@@ -39,7 +38,7 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
-// plan one api.
+// todo one api.
 router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -48,10 +47,9 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
       return next({ s: 200, m: "아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any> | null = await plan.findOne({
+    const data: Model<any, any> | null = await todo.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         id
@@ -69,21 +67,22 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
   } 
 });
 
-// plan add api.
+// todo add api.
 router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, userId } = req.body;
+    const { userId, start, end, success } = req.body;
 
-    const reqCheck = objCheck({ start, end, userId });
+    const checkIf = objCheck({ userId, start, end, success });
 
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 내용이 있습니다.` });
+    if(checkIf) {
+      console.log(checkIf);
+      return next({ s: 200, m: "비어있는 내용이 있습니다." });
     }
-
+    
     const data = await sequelize.transaction( async (transaction) => {
-      return await plan.create({
+      return await todo.create({
         ...req.body,
+        userId
       }, { 
         transaction 
       });
@@ -100,20 +99,20 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
   }
 });
 
-// plan update api.
+// todo update api.
 router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, id } = req.body;
+    const { id, start, end, success } = req.body;
 
-    const reqCheck = objCheck({ start, end, id });
+    const checkIf = objCheck({ id, start, end, success });
 
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 내용이 있습니다.` });
+    if(checkIf) {
+      console.log(checkIf)
+      return next({ s: 200, m: "비어있는 내용이 있습니다." });
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.update({
+      await todo.update({
         ...req.body
       }, {
         where: {
@@ -123,10 +122,9 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
       });
     });
 
-    const data = await plan.findOne({
+    const data = await todo.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         id
@@ -144,7 +142,7 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
-// plan delete api.
+// todo delete api.
 router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -154,12 +152,12 @@ router.delete("/", check, async (req: Request, res: Response, next: NextFunction
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.destroy({
+      await todo.destroy({
         where: {
           id
         },
         transaction
-      })
+      });
     });
 
     return res.status(200).send({

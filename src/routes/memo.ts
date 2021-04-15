@@ -3,13 +3,12 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 import { check } from '../jwt';
-import { objCheck } from '../utils';
 
 const router = express.Router();
 
-const { plan, user, schedule } = sequelize.models;
+const { memo, user } = sequelize.models;
 
-// plan all api.
+// memo all api.
 router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.query;
@@ -18,10 +17,9 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
       return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any>[] = await plan.findAll({
+    const data: Model<any, any>[] = await memo.findAll({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         userId
@@ -39,7 +37,7 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
-// plan one api.
+// memo one api.
 router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -48,10 +46,9 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
       return next({ s: 200, m: "아이디가 비어있습니다." });
     }
 
-    const data: Model<any, any> | null = await plan.findOne({
+    const data: Model<any, any> | null = await memo.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         id
@@ -69,21 +66,19 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
   } 
 });
 
-// plan add api.
+// memo add api.
 router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, userId } = req.body;
+    const { userId } = req.body;
 
-    const reqCheck = objCheck({ start, end, userId });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 내용이 있습니다.` });
+    if(!userId) {
+      return next({ s: 200, m: "유저 아이디가 비어있습니다." });
     }
-
+    
     const data = await sequelize.transaction( async (transaction) => {
-      return await plan.create({
+      return await memo.create({
         ...req.body,
+        userId
       }, { 
         transaction 
       });
@@ -100,20 +95,17 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
   }
 });
 
-// plan update api.
+// memo update api.
 router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { start, end, id } = req.body;
+    const { id } = req.body;
 
-    const reqCheck = objCheck({ start, end, id });
-
-    if(reqCheck) {
-      console.log(reqCheck);
-      return next({ s: 200, m: `비어있는 내용이 있습니다.` });
+    if(!id) {
+      return next({ s: 200, m: "선택된 메모가 없습니다." });
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.update({
+      await memo.update({
         ...req.body
       }, {
         where: {
@@ -123,10 +115,9 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
       });
     });
 
-    const data = await plan.findOne({
+    const data = await memo.findOne({
       include: [
         { model: user, attributes: ["id", "name"] },
-        { model: schedule }
       ],
       where: {
         id
@@ -144,7 +135,7 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
-// plan delete api.
+// memo delete api.
 router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.query;
@@ -154,12 +145,12 @@ router.delete("/", check, async (req: Request, res: Response, next: NextFunction
     }
 
     await sequelize.transaction( async (transaction) => {
-      await plan.destroy({
+      await memo.destroy({
         where: {
           id
         },
         transaction
-      })
+      });
     });
 
     return res.status(200).send({
