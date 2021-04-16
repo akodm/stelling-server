@@ -1,4 +1,4 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Response, Request } from 'express';
 import jwt from 'jsonwebtoken';
 import { Model } from 'sequelize/types';
 import sequelize from './sequelize';
@@ -56,12 +56,16 @@ export const verify = (token: string) => {
 };
 
 // user token check function.
-export const check = async (req: any, res: Response, next: NextFunction) => {
+export const check = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req?.headers["authorization"];
+    const token: string | undefined = req?.headers["authorization"];
 
     if(!token) {
       return next({ s: 401, m: "unauthrization." });
+    }
+
+    if(!token.split("Bearer")[1]?.trim()) {
+      return next({ s: 401, m: "잘못된 방식의 토큰입니다." });
     }
 
     const value =  token.split("Bearer")[1].trim();
