@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
