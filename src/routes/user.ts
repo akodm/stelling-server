@@ -185,6 +185,7 @@ router.post("/logout", check, async (req: any, res: Response, next: NextFunction
 router.get("/token", check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
+    const { reissue } = req.query;
 
     if(!userId) {
       throw new Error("사용자 아이디가 없습니다.");
@@ -197,10 +198,14 @@ router.get("/token", check, async (req: any, res: Response, next: NextFunction) 
       }
     });
 
-    const token = sign({ userId });
+    let token: string | false = false;
 
-    if(!token) {
-      throw new Error("사용자 조회 중 에러가 발생했습니다. 다시 시도해주세요.");
+    if(reissue) {
+      token = sign({ userId });
+
+      if(!token) {
+        throw new Error("사용자 조회 중 에러가 발생했습니다. 다시 시도해주세요.");
+      }
     }
 
     return res.status(200).send({
