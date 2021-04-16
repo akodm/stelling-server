@@ -25,16 +25,21 @@ export const uploader = (path: string) => multer({
     s3: AwsClient,
     bucket: BUCKET_NAME as string,
     acl: "public-read",
-    key: (req, file, cd) => {
+    key: (req: any, file, cd) => {
+      const { userId } = req.user;
       const now = moment();
       const { mimetype, originalname } = file;
       const parseName = originalname.replace(/ /g, "");
       const [ type ] = mimetype.split("/");
 
+      if(!userId) {
+        return cd("user id is null.", undefined);
+      }
+
       if(type === "image") {
-        cd(null, `image/${path}/${now.format("YYYY-MM-DD-ddd")}/${now.format("x")}_${parseName}`);
+        return cd(null, `image/${path}/${userId}/${now.format("YYYY-MM-DD-ddd")}/${now.format("x")}_${parseName}`);
       } else {
-        cd("type missmatch. ( require image. )", undefined);
+        return cd("type missmatch. ( require image. )", undefined);
       }
     }
   })
