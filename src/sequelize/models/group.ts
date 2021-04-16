@@ -21,7 +21,7 @@ export const groupTable = (sequelize: Sequelize): GroupStatic => {
       autoIncrement: true
     },
     title: {
-      type: DataTypes.STRING,      // 제목
+      type: DataTypes.STRING(20),      // 제목
     },
   },
   {

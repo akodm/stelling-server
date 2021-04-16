@@ -9,9 +9,14 @@ const router = express.Router();
 const { page, user, group, media } = sequelize.models;
 
 // page all api.
-router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { groupId } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!groupId) {
       return next({ s: 200, m: "선택된 그룹이 없습니다." });
@@ -20,14 +25,19 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
     const data: Model<any, any>[] = await page.findAll({
       include: [{ 
         model: group, include: [{ 
-          model: user, attributes: ["id", "name"] 
-        }]
+          model: user, attributes: ["id", "name"],
+          where: {
+            id: userId
+          },
+          required: true
+        }],
+        required: true
       },
       {
         model: media
       }],
       where: {
-        groupId
+        groupId,
       }
     });
 
@@ -43,9 +53,14 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
 });
 
 // page one api.
-router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "아이디가 비어있습니다." });
@@ -55,8 +70,12 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
       include: [
         { 
           model: group, include: [{ 
-            model: user, attributes: ["id", "name"] 
-          }]
+            model: user, attributes: ["id", "name"], where: {
+              id: userId
+            },
+            required: true
+          }],
+          required: true
         },
         {
           model: media
@@ -79,15 +98,20 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
 });
 
 // page add api.
-router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { groupId } = req.body;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!groupId) {
       return next({ s: 200, m: "선택된 그룹이 없습니다." });
     }
 
-    const data = await sequelize.transaction( async (transaction) => {
+    const data: Model<any, any> | null = await sequelize.transaction( async (transaction) => {
       return await page.create({
         ...req.body,
       }, { 
@@ -107,12 +131,39 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
 });
 
 // page update api.
-router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.put("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.body;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "페이지 아이디가 비어있습니다." });
+    }
+
+    const find: Model<any, any> | null = await page.findOne({
+      include: [{ 
+        model: group, include: [{ 
+          model: user, attributes: ["id", "name"], where: {
+            id: userId
+          },
+          required: true
+        }],
+        required: true
+      },
+      {
+        model: media
+      }],
+      where: {
+        id
+      }
+    });
+
+    if(!find || find.getDataValue("id").toString() !== id.toString()) {
+      return next({ s: 401, m: "데이터가 없거나 해당 사용자의 데이터가 아닙니다." });
     }
 
     await sequelize.transaction( async (transaction) => {
@@ -126,11 +177,15 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
       });
     });
 
-    const data = await page.findOne({
+    const data: Model<any, any> | null = await page.findOne({
       include: [{ 
         model: group, include: [{ 
-          model: user, attributes: ["id", "name"] 
-        }]
+          model: user, attributes: ["id", "name"], where: {
+            id: userId
+          },
+          required: true
+        }],
+        required: true
       },
       {
         model: media
@@ -152,12 +207,41 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
 });
 
 // page delete api.
-router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "아이디가 비어있습니다." });
+    }
+
+    const data: Model<any, any> | null = await page.findOne({
+      include: [
+        { 
+          model: group, include: [{ 
+            model: user, attributes: ["id", "name"], where: {
+              id: userId
+            },
+            required: true
+          }],
+          required: true
+        },
+        {
+          model: media
+        }
+      ],
+      where: {
+        id
+      }
+    });
+
+    if(!data || data.getDataValue("id").toString() !== id.toString()) {
+      return next({ s: 401, m: "데이터가 없거나 해당 사용자의 데이터가 아닙니다." });
     }
 
     await sequelize.transaction( async (transaction) => {

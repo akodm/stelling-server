@@ -7,18 +7,44 @@ import { check } from '../jwt';
 
 const router = express.Router();
 
-const { media } = sequelize.models;
+const { media, page, group, user } = sequelize.models;
 
 // media all api.
-router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { pageId } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!pageId) {
       return next({ s: 200, m: "페이지 아이디가 없습니다." });
     }
 
     const data: Model<any, any>[] = await media.findAll({
+      include: [
+        {
+          model: page,
+          required: true,
+          include: [
+            {
+              model: group,
+              required: true,
+              include: [
+                {
+                  model: user,
+                  required: true,
+                  where: {
+                    id: userId
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
       where: {
         pageId
       }
@@ -36,15 +62,41 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
 });
 
 // media one api.
-router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "아이디가 없습니다." });
     }
 
     const data: Model<any, any> | null = await media.findOne({
+      include: [
+        {
+          model: page,
+          required: true,
+          include: [
+            {
+              model: group,
+              required: true,
+              include: [
+                {
+                  model: user,
+                  required: true,
+                  where: {
+                    id: userId
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
       where: {
         id
       }
@@ -64,9 +116,14 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
 // media add api.
 router.post("/", check, uploader("pages").single("image"), async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { name, pageId } = req.body;
     const { key, mimetype, originalname, location } = req.file;
 
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
+    
     const checkIf = objCheck({ pageId, name, key, originalname, mimetype, location });
 
     if(checkIf) {
@@ -102,9 +159,14 @@ router.post("/", check, uploader("pages").single("image"), async (req: any, res:
 });
 
 // media delete api.
-router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id, pageId } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id && !pageId) {
       return next({ s: 200, m: "아이디와 페이지 아이디가 둘 다 없습니다." });
@@ -112,6 +174,27 @@ router.delete("/", check, async (req: Request, res: Response, next: NextFunction
 
     if(id) {
       const data: Model<any, any> | null = await media.findOne({
+        include: [
+          {
+            model: page,
+            required: true,
+            include: [
+              {
+                model: group,
+                required: true,
+                include: [
+                  {
+                    model: user,
+                    required: true,
+                    where: {
+                      id: userId
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
         where: {
           id
         }
@@ -140,6 +223,27 @@ router.delete("/", check, async (req: Request, res: Response, next: NextFunction
 
     if(pageId) {
       const data: Model<any, any>[] = await media.findAll({
+        include: [
+          {
+            model: page,
+            required: true,
+            include: [
+              {
+                model: group,
+                required: true,
+                include: [
+                  {
+                    model: user,
+                    required: true,
+                    where: {
+                      id: userId
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
         where: {
           pageId
         }

@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize, BuildOptions } from 'sequelize';
+import moment from 'moment';
 
 export interface TodoAttributes {
   id: number;
@@ -29,14 +30,17 @@ export const todoTable = (sequelize: Sequelize): TodoStatic => {
     start: {
       type: DataTypes.STRING(20),      // 시작일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
     end: {
       type: DataTypes.STRING(20),      // 종료일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
     success: {
       type: DataTypes.STRING(1),      // 체크 여부
       allowNull: false,
+      defaultValue: "N"
     },
   },
   {

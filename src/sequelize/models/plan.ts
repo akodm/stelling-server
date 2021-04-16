@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize, BuildOptions } from 'sequelize';
+import moment from 'moment';
 
 export interface PlanAttributes {
   id: number;
@@ -24,10 +25,12 @@ export const planTable = (sequelize: Sequelize): PlanStatic => {
     start: {
       type: DataTypes.STRING(20),      // 시작일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
     end: {
       type: DataTypes.STRING(20),      // 종료일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
   },
   {

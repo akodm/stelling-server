@@ -1,4 +1,5 @@
 import { DataTypes, Model, Sequelize, BuildOptions } from 'sequelize';
+import moment from 'moment';
 
 export interface ScheduleAttributes {
   id: number;
@@ -24,7 +25,7 @@ export const scheduleTable = (sequelize: Sequelize): ScheduleStatic => {
       autoIncrement: true
     },
     title: {
-      type: DataTypes.STRING,      // 제목
+      type: DataTypes.STRING(30),      // 제목
       allowNull: false,
     },
     content: {
@@ -33,10 +34,12 @@ export const scheduleTable = (sequelize: Sequelize): ScheduleStatic => {
     start: {
       type: DataTypes.STRING(20),      // 시작일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
     end: {
       type: DataTypes.STRING(20),      // 종료일
       allowNull: false,
+      defaultValue: moment().format("YYYY-MM-DD")
     },
   },
   {

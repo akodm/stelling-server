@@ -10,17 +10,19 @@ const router = express.Router();
 const { todo, user } = sequelize.models;
 
 // todo all api.
-router.get("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.query;
+    const { userId } = req.user;
 
     if(!userId) {
-      return next({ s: 200, m: "유저 아이디가 비어있습니다." });
+      throw new Error("유저 아이디가 없습니다.");
     }
 
     const data: Model<any, any>[] = await todo.findAll({
       include: [
-        { model: user, attributes: ["id", "name"] },
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         userId
@@ -39,9 +41,14 @@ router.get("/", check, async (req: Request, res: Response, next: NextFunction) =
 });
 
 // todo one api.
-router.get("/one", check, async (req: Request, res: Response, next: NextFunction) => {
+router.get("/one", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "아이디가 비어있습니다." });
@@ -49,10 +56,13 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
 
     const data: Model<any, any> | null = await todo.findOne({
       include: [
-        { model: user, attributes: ["id", "name"] },
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
-        id
+        id,
+        userId
       }
     });
 
@@ -68,18 +78,23 @@ router.get("/one", check, async (req: Request, res: Response, next: NextFunction
 });
 
 // todo add api.
-router.post('/', check, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { userId, start, end, success } = req.body;
+    const { userId } = req.user;
+    const { start, end, success } = req.body;
 
-    const checkIf = objCheck({ userId, start, end, success });
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
+
+    const checkIf = objCheck({ start, end, success });
 
     if(checkIf) {
       console.log(checkIf);
       return next({ s: 200, m: "비어있는 내용이 있습니다." });
     }
     
-    const data = await sequelize.transaction( async (transaction) => {
+    const data: Model<any, any> | null = await sequelize.transaction( async (transaction) => {
       return await todo.create({
         ...req.body,
         userId
@@ -100,9 +115,14 @@ router.post('/', check, async (req: Request, res: Response, next: NextFunction) 
 });
 
 // todo update api.
-router.put("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.put("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id, start, end, success } = req.body;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     const checkIf = objCheck({ id, start, end, success });
 
@@ -110,6 +130,21 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
       console.log(checkIf)
       return next({ s: 200, m: "비어있는 내용이 있습니다." });
     }
+
+    const find: Model<any, any> | null = await todo.findOne({
+      include: [
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
+      ],
+      where: {
+        id
+      }
+    });
+
+    if(!find || find.getDataValue("id").toString() !== id.toString()) {
+      return next({ s: 401, m: "데이터가 없거나 해당 사용자의 데이터가 아닙니다." });
+    } 
 
     await sequelize.transaction( async (transaction) => {
       await todo.update({
@@ -122,9 +157,11 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
       });
     });
 
-    const data = await todo.findOne({
+    const data: Model<any, any> | null = await todo.findOne({
       include: [
-        { model: user, attributes: ["id", "name"] },
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         id
@@ -143,12 +180,38 @@ router.put("/", check, async (req: Request, res: Response, next: NextFunction) =
 });
 
 // todo delete api.
-router.delete("/", check, async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
+    const { userId } = req.user;
     const { id } = req.query;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
 
     if(!id) {
       return next({ s: 200, m: "아이디가 비어있습니다." });
+    }
+
+    const data: Model<any, any> | null = await todo.findOne({
+      include: [
+        {
+          model: user, 
+          attributes: ["id", "name"],
+          where: {
+            id: userId
+          },
+          required: true
+        }
+      ],
+      where: {
+        id,
+        userId
+      }
+    }); 
+
+    if(!data || data.getDataValue("id").toString() !== id.toString()) {
+      return next({ s: 401, m: "데이터가 없거나 해당 사용자의 데이터가 아닙니다." });
     }
 
     await sequelize.transaction( async (transaction) => {

@@ -39,7 +39,8 @@ export const userTable = (sequelize: Sequelize): UserStatic => {
     },
     login: {
       type: DataTypes.STRING(1),           // 현재 로그인 여부
-      allowNull: false
+      allowNull: false,
+      defaultValue: "N"
     }
   },
   {

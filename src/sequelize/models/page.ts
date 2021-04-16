@@ -28,13 +28,7 @@ export const pageTable = (sequelize: Sequelize): PageStatic => {
     },
     content: {
       type: DataTypes.TEXT,      // 내용
-    },
-    start: {
-      type: DataTypes.STRING(20),      // 시작일
-    },
-    end: {
-      type: DataTypes.STRING(20),      // 종료일
-    },
+    }
   },
   {
     freezeTableName: true
