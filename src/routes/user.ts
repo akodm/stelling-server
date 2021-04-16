@@ -15,7 +15,7 @@ const { KAKAO_KEY, KAKAO_SECRET, CLIENT_URL, GOOGLE_KEY, GOOGLE_SECRET } = proce
 
 const { user } = sequelize.models;
 
-const FAILED_REDIRECT_PATH = `${CLIENT_URL}/#/login?state=failed`;
+const FAILED_REDIRECT_PATH = `${CLIENT_URL}/login?state=failed`;
 
 // strategy.
 const KakaoStrategy = passportKakao.Strategy;
@@ -86,7 +86,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
       token
     }
 
-    return res.redirect(`${CLIENT_URL}/#/login?${qs.stringify(query)}`);
+    return res.redirect(`${CLIENT_URL}?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
     return res.redirect(FAILED_REDIRECT_PATH);
@@ -131,7 +131,7 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
       token
     }
 
-    return res.redirect(`${CLIENT_URL}/#/login?${qs.stringify(query)}`);
+    return res.redirect(`${CLIENT_URL}?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
     return res.redirect(FAILED_REDIRECT_PATH);
