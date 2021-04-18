@@ -234,4 +234,51 @@ router.delete("/", check, async (req: any, res: Response, next: NextFunction) =>
   }
 });
 
+// todo bulk update api.
+router.put("/multiple", check, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+    const { todos } = req.body;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
+
+    const data = await sequelize.transaction( async (transaction) => {
+      const promiseTodos = todos.map((values: any) => {
+        return todo.update({
+          ...values
+        }, {
+          where: {
+            id: values.id
+          },
+          transaction
+        });
+      });
+
+      await Promise.all(promiseTodos);
+
+      return await todo.findAll({
+        include: [
+          { model: user, attributes: ["id", "name"], where: {
+            id: userId
+          }, required: true },
+        ],
+        where: {
+          userId
+        }
+      });
+    });
+
+    return res.status(200).send({
+      result: true,
+      data
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
 export default router;

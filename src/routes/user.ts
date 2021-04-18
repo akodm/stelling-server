@@ -251,8 +251,10 @@ router.get("/one", check, async (req: any, res: Response, next: NextFunction) =>
 router.put("/", check, uploader("users").single("profile"), async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
-    const { name = "" } = req.body;
-    const { key, location } = req.file;
+    const { name } = req.body;
+
+    let key = req.file?.key || null;
+    let location = req.file?.location || null;
 
     if(!userId) {
       if(key) {
