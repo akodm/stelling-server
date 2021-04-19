@@ -244,7 +244,7 @@ router.put("/multiple", check, async (req: any, res: Response, next: NextFunctio
       throw new Error("유저 아이디가 없습니다.");
     }
 
-    const data = await sequelize.transaction( async (transaction) => {
+    const data: Model<any, any>[] = await sequelize.transaction( async (transaction) => {
       const promiseTodos = todos.map((values: any) => {
         return todo.update({
           ...values

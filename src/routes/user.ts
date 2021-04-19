@@ -283,9 +283,16 @@ router.put("/", check, uploader("users").single("profile"), async (req: any, res
       });
     });
 
+    const data: Model<any, any> | null = await user.findOne({
+      attributes: ["id", "name", "profile"],
+      where: {
+        id: userId
+      }
+    });
+
     return res.status(200).send({
       result: true,
-      data: "성공적으로 수정되었습니다."
+      data
     });
   } catch(err) {
     err.status = err.status ?? 500;
