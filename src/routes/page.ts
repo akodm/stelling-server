@@ -114,6 +114,7 @@ router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
     const data: Model<any, any> | null = await sequelize.transaction( async (transaction) => {
       return await page.create({
         ...req.body,
+        title: "new page"
       }, { 
         transaction 
       });
@@ -256,6 +257,62 @@ router.delete("/", check, async (req: any, res: Response, next: NextFunction) =>
     return res.status(200).send({
       result: true,
       data: "성공적으로 삭제되었습니다."
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+// page bulk update api.
+router.put("/multiple", check, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+    const { pageList, groupId } = req.body;
+
+    if(!userId) {
+      throw new Error("유저 아이디가 없습니다.");
+    }
+
+    const data: Model<any, any>[] = await sequelize.transaction( async (transaction) => {
+      const promisePages =  pageList.map((value: any) => {
+        return page.update({
+          ...value
+        }, {
+          where: {
+            id: value.id,
+            groupId
+          },
+          transaction
+        });
+      });
+
+      await Promise.all(promisePages);
+
+      return await page.findAll({
+        include: [{ 
+          model: group, include: [{ 
+            model: user, attributes: ["id", "name"],
+            where: {
+              id: userId
+            },
+            required: true
+          }],
+          required: true
+        },
+        {
+          model: media
+        }],
+        where: {
+          groupId,
+        }
+      });
+    });    
+
+    return res.status(200).send({
+      result: true,
+      data
     });
   } catch(err) {
     err.status = err.status ?? 500;

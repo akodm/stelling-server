@@ -281,7 +281,7 @@ router.put("/multiple", check, async (req: any, res: Response, next: NextFunctio
         where: {
           userId
         }
-      })
+      });
     });
 
     return res.status(200).send({
