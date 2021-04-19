@@ -13,7 +13,7 @@ const router = express.Router();
 
 const { KAKAO_KEY, KAKAO_SECRET, CLIENT_URL, GOOGLE_KEY, GOOGLE_SECRET } = process.env;
 
-const { user } = sequelize.models;
+const { user, memo } = sequelize.models;
 
 const FAILED_REDIRECT_PATH = `${CLIENT_URL}/login?state=failed`;
 
@@ -48,6 +48,39 @@ passport.use(new GoogleStrategy({
   return done(null, profile._json.email);
 }));
 
+interface MemoInitType {
+  err: boolean;
+  message: string | undefined;
+  data: Model<any, any> | null;
+}
+
+// user create & memo create.
+const memoInitDb = async (userId: number) => {
+  try {
+    const data: Model<any, any> | null = await memo.create({
+      content: "아직 메모가 없어요! 중요한 내용을 기록해보세요!",
+      userId
+    });
+
+    if(!data || !data.getDataValue("id")) {
+      console.log("사용자 아이디:", userId);
+      throw new Error("메모가 정상적으로 생성되지 않았습니다. 사용자 아이디를 확인해주세요.");
+    }
+
+    return {
+      err: false,
+      message: "",
+      data
+    };
+  } catch(err) {
+    return {
+      err: true,
+      message: err.message || "",
+      data: null
+    };
+  }
+};
+
 // kakao auth.
 router.get("/kakao", passport.authenticate('kakao', { session: false }));
 
@@ -73,9 +106,15 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
         type: "kakao",
         login: "Y"
       });
+
+      const memoResult: MemoInitType = await memoInitDb(userData.getDataValue("id"));
+
+      if(memoResult.err) {
+        throw new Error(memoResult.message);
+      }
     }
 
-    const token = sign({ userId: userData.getDataValue("id") });
+    const token: string | false = sign({ userId: userData.getDataValue("id") });
 
     if(!token) {
       throw new Error("사용자 로그인 중 에러가 발생했습니다. 다시 시도해주세요.");
@@ -118,9 +157,15 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
         type: "google",
         login: "Y"
       });
+
+      const memoResult: MemoInitType = await memoInitDb(userData.getDataValue("id"));
+
+      if(memoResult.err) {
+        throw new Error(memoResult.message);
+      }
     }
 
-    const token = sign({ userId: userData.getDataValue("id") });
+    const token: string | false = sign({ userId: userData.getDataValue("id") });
 
     if(!token) {
       throw new Error("사용자 로그인 중 에러가 발생했습니다. 다시 시도해주세요.");

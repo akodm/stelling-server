@@ -21,9 +21,6 @@ export const memoTable = (sequelize: Sequelize): MemoStatic => {
       allowNull: false,
       autoIncrement: true
     },
-    title: {
-      type: DataTypes.STRING,      // 제목
-    },
     content: {
       type: DataTypes.TEXT,      // 내용
     },

@@ -3,7 +3,7 @@ import moment from 'moment';
 import faker from 'faker';
 faker.locale = "ko";
 
-const { plan, group, memo, todo } = sequelize.models;
+const { plan, group, todo } = sequelize.models;
 
 export const dummyCreatorFunction = async (userId: number) => {
   try {
@@ -31,19 +31,6 @@ export const dummyCreatorFunction = async (userId: number) => {
         title: faker.name.jobType(),
         userId
       },
-    ];
-    
-    const memos = [
-      {
-        title: faker.name.jobTitle(),
-        content: faker.lorem.sentences(),
-        userId
-      },
-      {
-        title: faker.name.jobTitle(),
-        content: faker.lorem.sentences(),
-        userId
-      }
     ];
     
     const todos = [
@@ -94,7 +81,6 @@ export const dummyCreatorFunction = async (userId: number) => {
     await sequelize.transaction( async (transaction) => {
       await plan.bulkCreate(plans, { updateOnDuplicate: ["id"], transaction });
       await group.bulkCreate(groups, { updateOnDuplicate: ["id"], transaction });
-      await memo.bulkCreate(memos, { updateOnDuplicate: ["id"], transaction });
       await todo.bulkCreate(todos, { updateOnDuplicate: ["id"], transaction });
     });
     

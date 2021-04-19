@@ -48,11 +48,12 @@ try {
 
 	user.hasMany(todo, { onDelete: "cascade" });
 	user.hasMany(plan, { onDelete: "cascade" });
-	user.hasMany(memo, { onDelete: "cascade" });
 	user.hasMany(group, { onDelete: "cascade" });
 	plan.hasMany(schedule, { onDelete: "cascade" });
 	group.hasMany(page, { onDelete: "cascade" });
 	page.hasMany(media, { onDelete: "cascade" });
+
+	user.hasOne(memo, { onDelete: "cascade" });
 
 	todo.belongsTo(user);
 	plan.belongsTo(user);
