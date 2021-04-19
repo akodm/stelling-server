@@ -298,8 +298,8 @@ router.put("/", check, uploader("users").single("profile"), async (req: any, res
     const { userId } = req.user;
     const { name } = req.body;
 
-    let key = req.file?.key || null;
-    let location = req.file?.location || null;
+    let key = req.file?.key;
+    let location = req.file?.location;
 
     if(!userId) {
       if(key) {
