@@ -10,7 +10,7 @@ import { mediaTable } from './models/media';
 
 console.log("mysql database connecting..");
 
-const { DB = "database", ROOT = "root", PASS = "pass", HOST = "localhost", DB_FORCE = "false", pm_id, NODE_ENV = "development" } = process.env;
+const { DB = "database", DB_PORT, ROOT = "root", PASS = "pass", HOST = "localhost", DB_FORCE = "false", pm_id, NODE_ENV = "development" } = process.env;
 
 let sequelize: Sequelize;
 
@@ -21,6 +21,7 @@ try {
     PASS, 
     {
       host : HOST,
+			port: parseInt(DB_PORT as string),
       dialect: 'mysql',
       define: {
         charset: "utf8mb4",
