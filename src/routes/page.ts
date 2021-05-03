@@ -114,7 +114,6 @@ router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
     const data: Model<any, any> | null = await sequelize.transaction( async (transaction) => {
       return await page.create({
         ...req.body,
-        title: "new page"
       }, { 
         transaction 
       });
