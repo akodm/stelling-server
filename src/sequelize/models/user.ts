@@ -5,6 +5,8 @@ export interface UserAttributes {
   email: string;
   name: string;
   profile: string;
+  type: string;
+  login: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

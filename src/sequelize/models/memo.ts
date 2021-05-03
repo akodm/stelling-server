@@ -2,7 +2,6 @@ import { DataTypes, Model, Sequelize, BuildOptions } from 'sequelize';
 
 export interface MemoAttributes {
   id: number;
-  title: string;
   content: string;
   createdAt?: Date;
   updatedAt?: Date;
