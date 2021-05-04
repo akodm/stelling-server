@@ -253,6 +253,19 @@ router.get("/token", check, async (req: any, res: Response, next: NextFunction) 
       }
     }
 
+    if(data && data.getDataValue("id")) {
+      await sequelize.transaction( async (transaction) => {
+        await user.update({
+          login: "Y"
+        }, {
+          where: {
+            id: userId
+          },
+          transaction
+        });
+      });
+    }
+
     return res.status(200).send({
       result: true,
       token,
