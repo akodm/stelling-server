@@ -15,7 +15,7 @@ const { KAKAO_KEY, KAKAO_SECRET, CLIENT_URL, GOOGLE_KEY, GOOGLE_SECRET } = proce
 
 const { user, memo } = sequelize.models;
 
-const FAILED_REDIRECT_PATH = `${CLIENT_URL}/login?state=failed`;
+const FAILED_REDIRECT_PATH = `${CLIENT_URL}?state=failed`;
 
 // strategy.
 const KakaoStrategy = passportKakao.Strategy;
@@ -28,7 +28,7 @@ passport.use(new KakaoStrategy({
   callbackURL: `/user/kakao/callback`
 }, (accessToken, refreshToken, profile, done) => {
   if(!profile?._json?.kakao_account?.email) {
-    return done("카카오 계정이 없습니다.");
+    return done(null, undefined);
   }
 
   return done(null, profile._json.kakao_account.email);
@@ -42,7 +42,7 @@ passport.use(new GoogleStrategy({
   scope: ["email"]
 }, (accessToken, refreshToken, profile, done) => {
   if(!profile?._json?.email) {
-    return done("구글 계정이 없습니다.");
+    return done(null, undefined);
   }
 
   return done(null, profile._json.email);
@@ -89,8 +89,8 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
   try {
     const email = req.user;
 
-    if(!email) {
-      throw new Error("해당 카카오 계정이 없거나 잘못되었습니다.");
+    if(!email || email === undefined) {
+      return res.redirect(302, FAILED_REDIRECT_PATH);
     }
 
     let userData: Model<any, any> | null = await user.findOne({ 
@@ -128,7 +128,7 @@ router.get("/kakao/callback", passport.authenticate('kakao', { session: false, f
     return res.redirect(`${CLIENT_URL}?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
-    return res.redirect(FAILED_REDIRECT_PATH);
+    return res.redirect(302, FAILED_REDIRECT_PATH);
   }
 });
 
@@ -140,8 +140,8 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
   try {
     const email = req.user;
 
-    if(!email) {
-      throw new Error("해당 구글 계정이 없거나 잘못되었습니다.");
+    if(!email || email === undefined) {
+      return res.redirect(302, FAILED_REDIRECT_PATH);
     }
 
     let userData: Model<any, any> | null = await user.findOne({ 
@@ -179,7 +179,7 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
     return res.redirect(`${CLIENT_URL}?${qs.stringify(query)}`);
   } catch(err) {
     console.log(err);
-    return res.redirect(FAILED_REDIRECT_PATH);
+    return res.redirect(302, FAILED_REDIRECT_PATH);
   }
 });
 
