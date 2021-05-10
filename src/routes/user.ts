@@ -8,6 +8,7 @@ import qs from 'qs';
 import passport from 'passport';
 import * as passportKakao from 'passport-kakao';
 import * as passportGoogle from 'passport-google-oauth20';
+import axios from "axios";
 
 const router = express.Router();
 
@@ -26,8 +27,14 @@ passport.use(new KakaoStrategy({
   clientID: KAKAO_KEY as string,
   clientSecret: KAKAO_SECRET as string,
   callbackURL: `/user/kakao/callback`
-}, (accessToken, refreshToken, profile, done) => {
+}, async (accessToken, refreshToken, profile, done) => {
   if(!profile?._json?.kakao_account?.email) {
+    await axios.post(`https://kapi.kakao.com/v1/user/unlink`, {}, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
     return done(null, undefined);
   }
 
