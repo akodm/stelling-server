@@ -50,7 +50,7 @@ try {
 	user.hasMany(todo, { onDelete: "cascade" });
 	user.hasMany(plan, { onDelete: "cascade" });
 	user.hasMany(group, { onDelete: "cascade" });
-	plan.hasMany(schedule, { onDelete: "cascade" });
+	user.hasMany(schedule, { onDelete: "cascade" });
 	group.hasMany(page, { onDelete: "cascade" });
 	page.hasMany(media, { onDelete: "cascade" });
 
@@ -60,7 +60,7 @@ try {
 	plan.belongsTo(user);
 	memo.belongsTo(user);
 	group.belongsTo(user);
-	schedule.belongsTo(plan);
+	schedule.belongsTo(user);
 	page.belongsTo(group);
 	media.belongsTo(page);
 

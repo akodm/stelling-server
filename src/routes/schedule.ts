@@ -13,29 +13,19 @@ const { schedule, plan, user } = sequelize.models;
 router.get("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
-    const { planId } = req.query;
 
     if(!userId) {
       throw new Error("유저 아이디가 없습니다.");
     }
 
-    if(!planId) {
-      return next({ s: 200, m: "플랜 아이디가 비어있습니다." });
-    }
-
     const data: Model<any, any>[] = await schedule.findAll({
       include: [
-        {
-          model: plan, include: [
-            { model: user, attributes: ["id", "name"], where: {
-              id: userId
-            }, required: true },
-          ],
-          required: true
-        }
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
-        planId
+        userId
       }
     });
 
@@ -66,14 +56,9 @@ router.get("/one", check, async (req: any, res: Response, next: NextFunction) =>
 
     const data: Model<any, any> | null = await schedule.findOne({
       include: [
-        {
-          model: plan, include: [
-            { model: user, attributes: ["id", "name"], where: {
-              id: userId
-            }, required: true },
-          ],
-          required: true
-        }
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         id
@@ -95,13 +80,13 @@ router.get("/one", check, async (req: any, res: Response, next: NextFunction) =>
 router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
-    const { planId, title, start, end } = req.body;
+    const { title, start, end } = req.body;
 
     if(!userId) {
       throw new Error("유저 아이디가 없습니다.");
     }
 
-    const checkIf = objCheck({ planId, title, start, end });
+    const checkIf = objCheck({ title, start, end });
 
     if(checkIf) {
       console.log(checkIf);
@@ -111,6 +96,7 @@ router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
     const data: Model<any, any> | null = await sequelize.transaction( async (transaction) => {
       return await schedule.create({
         ...req.body,
+        userId
       }, { 
         transaction 
       });
@@ -146,14 +132,9 @@ router.put("/", check, async (req: any, res: Response, next: NextFunction) => {
 
     const find: Model<any, any> | null = await schedule.findOne({
       include: [
-        {
-          model: plan, include: [
-            { model: user, attributes: ["id", "name"], where: {
-              id: userId
-            }, required: true },
-          ],
-          required: true
-        }
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         id
@@ -218,14 +199,9 @@ router.delete("/", check, async (req: any, res: Response, next: NextFunction) =>
 
     const data: Model<any, any> | null = await schedule.findOne({
       include: [
-        {
-          model: plan, include: [
-            { model: user, attributes: ["id", "name"], where: {
-              id: userId
-            }, required: true },
-          ],
-          required: true
-        }
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         id

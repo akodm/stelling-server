@@ -7,6 +7,7 @@ export interface ScheduleAttributes {
   content: string;
   start: string;
   end: string;
+  userId: number;
   createdAt?: Date;
   updatedAt?: Date;
 };
