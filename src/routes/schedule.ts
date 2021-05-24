@@ -80,13 +80,13 @@ router.get("/one", check, async (req: any, res: Response, next: NextFunction) =>
 router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
-    const { title, start, end } = req.body;
+    const { title, start, end, day } = req.body;
 
     if(!userId) {
       throw new Error("유저 아이디가 없습니다.");
     }
 
-    const checkIf = objCheck({ title, start, end });
+    const checkIf = objCheck({ title, start, end, day });
 
     if(checkIf) {
       console.log(checkIf);
@@ -117,13 +117,13 @@ router.post('/', check, async (req: any, res: Response, next: NextFunction) => {
 router.put("/", check, async (req: any, res: Response, next: NextFunction) => {
   try {
     const { userId } = req.user;
-    const { id, title, start, end } = req.body;
+    const { id, title, start, end, day } = req.body;
 
     if(!userId) {
       throw new Error("유저 아이디가 없습니다.");
     }
 
-    const checkIf = objCheck({ id, title, start, end });
+    const checkIf = objCheck({ id, title, start, end, day });
 
     if(checkIf) {
       console.log(checkIf);

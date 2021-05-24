@@ -5,6 +5,7 @@ export interface ScheduleAttributes {
   id: number;
   title: string;
   content: string;
+  day: string;
   start: string;
   end: string;
   userId: number;
@@ -32,15 +33,20 @@ export const scheduleTable = (sequelize: Sequelize): ScheduleStatic => {
     content: {
       type: DataTypes.STRING,      // 내용
     },
-    start: {
-      type: DataTypes.STRING(20),      // 시작일
+    day: {
+      type: DataTypes.STRING(20),           // 날짜 및 요일
       allowNull: false,
       defaultValue: moment().format("YYYY-MM-DD")
     },
-    end: {
-      type: DataTypes.STRING(20),      // 종료일
+    start: {
+      type: DataTypes.STRING(20),      // 시작 시간
       allowNull: false,
-      defaultValue: moment().format("YYYY-MM-DD")
+      defaultValue: moment().format("HH:mm")
+    },
+    end: {
+      type: DataTypes.STRING(20),      // 종료 시간
+      allowNull: false,
+      defaultValue: moment().format("HH:mm")
     },
   },
   {
