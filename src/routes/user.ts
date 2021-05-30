@@ -191,9 +191,9 @@ router.get("/google/callback", passport.authenticate('google', { session: false,
 });
 
 // non rest ful api. kakao login & google login & stelling login logout.
-router.post("/logout", check, async (req: any, res: Response, next: NextFunction) => {
+router.post("/logout", async (req: any, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.user;
+    const { userId } = req.body;
 
     if(!userId) {
       throw new Error("사용자 아이디가 없습니다.");
