@@ -158,14 +158,9 @@ router.put("/", check, async (req: any, res: Response, next: NextFunction) => {
 
     const data: Model<any, any> | null = await schedule.findOne({
       include: [
-        {
-          model: plan, include: [
-            { model: user, attributes: ["id", "name"], where: {
-              id: userId
-            }, required: true },
-          ],
-          required: true
-        }
+        { model: user, attributes: ["id", "name"], where: {
+          id: userId
+        }, required: true },
       ],
       where: {
         id
