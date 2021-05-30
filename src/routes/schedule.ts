@@ -7,7 +7,7 @@ import { check } from '../jwt';
 
 const router = express.Router();
 
-const { schedule, plan, user } = sequelize.models;
+const { schedule, user } = sequelize.models;
 
 // schedule all api.
 router.get("/", check, async (req: any, res: Response, next: NextFunction) => {
