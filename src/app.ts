@@ -64,15 +64,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  const status = err.s ?? err.status ?? 500;
-  const message = err.m ?? err.message ?? err;
+  const status = err.s || err.status || 500;
+  const message = err.m || "서버에서 에러가 발생했습니다. 다시 시도해주세요.";
 
   console.log(err);
 
-  return res.status(status).send({
+  return res.send({
     result: false,
     data: null,
-    message
+    message,
+    status
   });
 });
 

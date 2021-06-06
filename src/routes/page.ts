@@ -3,6 +3,7 @@ import express from 'express';
 import sequelize from '../sequelize';
 import { Model } from "sequelize/types";
 import { check } from '../jwt';
+import { uploader } from "../utils";
 
 const router = express.Router();
 
@@ -312,6 +313,29 @@ router.put("/multiple", check, async (req: any, res: Response, next: NextFunctio
     return res.status(200).send({
       result: true,
       data
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
+router.post("/image", check, uploader("pages").single("image"), async (req: any, res: Response, next: NextFunction) => {
+  try {
+    if(!req.file?.key || !req.user?.userId) {
+      next({ s: 403, m: "잘못된 호출입니다." });
+    }
+
+    const file = req.file;
+
+    return res.status(201).send({
+      result: true,
+      data: {
+        url: file.location,
+        name: file.originalname,
+        key: file.key
+      }
     });
   } catch(err) {
     err.status = err.status ?? 500;

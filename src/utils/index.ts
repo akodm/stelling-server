@@ -37,7 +37,7 @@ export const uploader = (path: string) => multer({
       }
 
       if(type === "image") {
-        return cd(null, `image/${path}/${userId}/${now.format("YYYY-MM-DD-ddd")}/${now.format("x")}_${parseName}`);
+        return cd(null, `image/${path}/${userId}/${now.format("YYYY-MM-DD-ddd")}/${parseName}`);
       } else {
         return cd("type missmatch. ( require image. )", undefined);
       }
