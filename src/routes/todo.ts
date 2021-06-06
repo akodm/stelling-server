@@ -281,4 +281,29 @@ router.put("/multiple", check, async (req: any, res: Response, next: NextFunctio
   }
 });
 
+// todo all delete api.
+router.delete("/multiple", check, async (req: any, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.user;
+
+    await sequelize.transaction( async transaction => {
+      await todo.destroy({
+        where: {
+          userId
+        },
+        transaction
+      });
+    });
+
+    return res.status(200).send({
+      result: true,
+      data: "정상적으로 모두 삭제되었습니다."
+    });
+  } catch(err) {
+    err.status = err.status ?? 500;
+
+    return next(err);
+  }
+});
+
 export default router;
