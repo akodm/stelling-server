@@ -48,6 +48,10 @@ export const scheduleTable = (sequelize: Sequelize): ScheduleStatic => {
       allowNull: false,
       defaultValue: moment().format("HH:mm")
     },
+    color: {
+      type: DataTypes.STRING(50),
+      defaultValue: "yellow"
+    }
   },
   {
     freezeTableName: true
